@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "workflows": [
+    {
+      "id": "pitch-prep",
+      "name": "Pitch Preparation Workflow",
+      "path": ".pi/prompts/pitch-prep.md",
+      "when": "Before any IAC meeting or client presentation",
+      "triggers": ["Pi IAC pitch", "meeting tomorrow", "prepare for Kyle"]
+    },
+    {
+      "id": "prism-sim",
+      "name": "Prism Simulation Workflow",
+      "path": ".pi/prompts/prism-sim.md",
+      "when": "Before high-stakes decisions or internal deliberation prep",
+      "triggers": ["Pi IAC prism", "run simulation", "what will Kyle say"]
+    },
+    {
+      "id": "hexis-eval",
+      "name": "Hexis 6-Lens Evaluation",
+      "path": ".pi/prompts/hexis-eval.md",
+      "when": "Evaluating a new strategic bet or venture",
+      "triggers": ["Pi IAC hexis", "run Hexis", "6-lens analysis"]
+    },
+    {
+      "id": "recon",
+      "name": "Deep Recon Workflow",
+      "path": ".pi/prompts/recon.md",
+      "when": "Researching IAC, competitors, or clients",
+      "triggers": ["Pi IAC recon", "research competitor", "scrape careers"]
+    },
+    {
+      "id": "website-audit",
+      "name": "Website Audit & Iteration",
+      "path": ".pi/prompts/website-audit.md",
+      "when": "Reviewing or updating the IAC demo site",
+      "triggers": ["Pi IAC website", "audit site", "fix vercel"]
+    },
+    {
+      "id": "content-create",
+      "name": "Content Creation Workflow",
+      "path": ".pi/prompts/content-create.md",
+      "when": "Producing blog posts, insights, or social content",
+      "triggers": ["Pi IAC content", "write insight", "draft post"]
+    },
+    {
+      "id": "campaign-health",
+      "name": "Campaign Health Check",
+      "path": ".pi/prompts/campaign-health.md",
+      "when": "Checking Instantly/Apollo campaign performance",
+      "triggers": ["Pi IAC campaigns", "check email", "campaign status"]
+    }
+  ]
+}
