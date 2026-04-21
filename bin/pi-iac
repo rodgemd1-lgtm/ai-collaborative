@@ -1,0 +1,230 @@
+#!/usr/bin/env zsh
+# Pi IAC — AI Collaborative Strategic Engagement Terminal
+# Usage: pi-iac [command]
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJ_DIR="$(dirname "$SCRIPT_DIR")"
+export PI_IAC_HOME="$PROJ_DIR"
+export IAC_CONTEXT="$PROJ_DIR/.pi/prompts/iac-context.md"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+print_header() {
+    echo ""
+    echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo "${BOLD}${CYAN}  π IA COLLABORATIVE${NC} — ${BOLD}Strategic Engagement Agent${NC}"
+    echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+}
+
+print_help() {
+    cat << 'EOF'
+COMMANDS:
+  pi-iac status           Show engagement status, deals, pipeline
+  pi-iac pitch            Run full pitch-prep (sim + deck + follow-up)
+  pi-iac prism [scenario] Run Prism simulation (meeting_reception | strategic_choice)
+  pi-iac recon            Deep recon on IAC or competitor
+  pi-iac content            Generate content (blog, insight, social)
+  pi-iac website            Audit the demo site
+  pi-iac campaigns          Check outreach campaign health
+  pi-iac hexis              Run Hexis 6-Lens on a bet
+  pi-iac context            Show master context (personas, blockers, packages)
+  pi-iac jobs               Show IAC hiring intelligence
+  pi-iac help             Show this help message
+
+SALES WORKFLOW:
+  pi-iac pitch          → Prepares pitch, sim, deck, and follow-up
+  pi-iac prism          → Runs decision simulation before key meetings
+  pi-iac recon          → Scrapes live competitor / IAC data
+  pi-iac campaigns      → Checks Instantly/Apollo outreach health
+
+CONTEXT:
+  Master context loaded from: .pi/prompts/iac-context.md
+  Company genome: startup-os/companies/ai-collaborative.yaml
+EOF
+}
+
+cmd_status() {
+    echo "${BOLD}${GREEN}ENGAGEMENT STATUS${NC}"
+    echo ""
+    cd "$PI_IAC_HOME" && python3 -c "
+import sys
+sys.path.insert(0, '.')
+from iac.client import ClientIntel
+intel = ClientIntel()
+print(intel.get_status())
+" 2>/dev/null || echo "No active deals yet. Run: pi-iac pitch"
+    echo ""
+    echo "${YELLOW}Key Intel:${NC}"
+    echo "  • IAC hiring 2 AI roles (GenAI Strategist + Product Strategist)"
+    echo "  • Budget: \$280–320K/year AI hiring"
+    echo "  • Kyle Smith: Decider (Ross MBA)"
+    echo "  • Matthew Alverson: AI Lead (territorial risk)"
+    echo "  • Co-CEOs: Dan Kraemer (commerce) + Kathleen Brandenburg (design)"
+}
+
+cmd_pitch() {
+    echo "${BOLD}${CYAN}PITCH PREP WORKFLOW${NC}"
+    echo ""
+    echo "Phase 1: Loading context..."
+    echo "  ✓ Master context loaded ($(wc -l < "$IAC_CONTEXT") lines)"
+    echo ""
+    echo "Phase 2: Running pre-flight checks..."
+    echo "  ☐ Prism simulation run before meeting? (run: pi-iac prism)"
+    echo "  ☐ Gamma deck reviewed? (check .vault/last-gamma-deck.txt)"
+    echo "  ☐ Website demo ready? (https://iac-mid-market-v5.vercel.app)"
+    echo "  ☐ 48h follow-up drafted? (see .pi/prompts/pitch-prep.md)"
+    echo ""
+    echo "Phase 3: Package quick-select"
+    echo "  A) Catalyst Sprint (\$100–150K) — Website + Agentic Demo"
+    echo "  B) Fabric LITE   (\$50–200K + \$5–15K/mo) — AI Platform"
+    echo "  C) Growth Strategy (\$50–250K) — Market Entry + Positioning"
+    echo "  D) Practice Build (\$250–400K) — Full AI Practice"
+    echo ""
+    echo "${YELLOW}Key Wedge (Updated):${NC}"
+    echo '  "I saw you\'re hiring a Senior GenAI Solutions Strategist."
+    echo '  That\'s smart — and exactly why I\'m reaching out.'
+    echo '  "For less than your annual AI hiring budget, we ship"'
+    echo '  "a complete AI platform in 8 weeks."'
+    echo ""
+    echo "${CYAN}Next:${NC} Run \`pi-iac prism meeting_reception\` before the Kyle meeting"
+}
+
+cmd_prism() {
+    SCENARIO="${1:-meeting_reception}"
+    echo "${BOLD}${CYAN}PRISM — Decision Simulation Engine${NC}"
+    echo "Scenario: $SCENARIO"
+    echo ""
+    cd "$PI_IAC_HOME" && python3 -m iac.simulation --scenario "$SCENARIO" --variant all_interventions
+    echo ""
+    echo "${YELLOW}Simulation saved to:${NC} data/simulations/"
+    echo "${CYAN}For full engine:${NC} cd ~/Desktop/Startup-Intelligence-OS/MiroFish"
+}
+
+cmd_context() {
+    echo "${BOLD}${CYAN}IAC MASTER CONTEXT${NC}"
+    echo ""
+    cat "$IAC_CONTEXT" | head -80
+    echo ""
+    echo "${YELLOW}... (truncated, see full file)${NC}"
+    echo "$IAC_CONTEXT"
+}
+
+cmd_jobs() {
+    echo "${BOLD}${GREEN}IAC HIRING INTELLIGENCE${NC}"
+    echo ""
+    echo "Active roles (sourced 2026-04-21 via Browser Use):"
+    echo ""
+    echo "${BOLD}1. Senior GenAI Solutions Strategist${NC}"
+    echo "   Dept: Technology & Data Strategy"
+    echo "   Loc:  Chicago — Hybrid"
+    echo "   Req:  RAG, agentic systems, Python, cloud (AWS/Azure/GCP)"
+    echo "   Est:  \$140–160K/year"
+    echo ""
+    echo "${BOLD}2. Senior Product Strategist${NC}"
+    echo "   Dept: Product Strategy"
+    echo "   Loc:  Chicago — Hybrid"
+    echo "   Req:  Shipped AI tools, prompt engineering, RAG, agentic systems"
+    echo "   Sal:  \$140,000–\$160,000/year"
+    echo ""
+    echo "${YELLOW}Wedge:${NC} 'While you're hiring, we ship in 8 weeks.'"
+    echo "${YELLOW}ROI:${NC}  Package A (\$125K) costs less than 1 year of 1 hire."
+}
+
+cmd_recon() {
+    echo "${BOLD}${CYAN}IAC DEEP RECON${NC}"
+    echo ""
+    echo "Running Browser Use Cloud scrape..."
+    echo "Target: https://iacollaborative.com/"
+    echo ""
+    echo "Use Browser Use Cloud API directly:"
+    echo "  API Key: bu_yqOqXL7AXnTBpo_Wf3fplAxOwu950C-F20HVQ19NczE"
+    echo "  Endpoint: https://api.browser-use.com/api/v3/sessions"
+    echo ""
+    echo "For competitor recon:"
+    echo "  IDEO:   https://www.ideo.com/"
+    echo "  Frog:   https://www.frogdesign.com/"
+    echo "  BCGDV:  https://www.bcgdv.com/"
+    echo "  Accenture Song: https://www.accenture.com/song"
+}
+
+cmd_campaigns() {
+    echo "${BOLD}${YELLOW}CAMPAIGN HEALTH CHECK${NC}"
+    echo ""
+    echo "Status: Instantly.ai — 3 failures since Apr 10"
+    echo ""
+    echo "Run health script:"
+    echo "  cd ~/Desktop/Startup-Intelligence-OS/scripts/"
+    echo "  python3 instantly_campaign_health.py"
+    echo ""
+    echo "Apollo enrichment: Use lead lists from data/leads/"
+    echo "Target segment: Mid-market \$50M–\$500M"
+    echo "Anchor targets: Glossier, YETI, Warby Parker, Robinhood, Coinbase"
+}
+
+cmd_website() {
+    echo "${BOLD}${CYAN}WEBSITE AUDIT${NC}"
+    echo ""
+    echo "Demo site: https://iac-mid-market-v5.vercel.app"
+    echo ""
+    echo "Products live:"
+    echo "  ✓ Catalyst Sprint   /products/catalyst-sprint.html"
+    echo "  ✓ Fabric LITE       /products/fabric-lite.html"
+    echo "  ✓ Prism             /products/prism.html"
+    echo "  ✓ Forefront Plat.   /products/forefront-platform.html"
+    echo ""
+    echo "Frameworks live:"
+    echo "  ✓ Hexis 6-Lens      /framework/"
+    echo ""
+    echo "${YELLOW}Note:${NC} This is STAGING. Production handoff = separate SOW."
+}
+
+cmd_hexis() {
+    echo "${BOLD}${CYAN}HEXIS 6-LENS FRAMEWORK${NC}"
+    echo ""
+    echo "Run Hexis evaluation on a strategic bet."
+    echo ""
+    echo "Six lenses: Consumer · Market · Technology · Regulatory · Talent · Capital"
+    echo ""
+    echo "Example: Hexis on 'Should IAC enter mid-market AI consulting?'"
+    echo ""
+    echo "See framework at: https://iac-mid-market-v5.vercel.app/framework/"
+}
+
+cmd_content() {
+    echo "${BOLD}${CYAN}CONTENT ENGINE${NC}"
+    echo ""
+    echo "Content pillars:"
+    echo "  1. The Mid-Market Wedge"
+    echo "  2. Framework as Product (IDEALS, Seven Elements, Hexis)"
+    echo "  3. Speed as Strategy (8 weeks from ambiguous to shipped)"
+    echo "  4. Collaborative Intelligence (category ownership)"
+    echo "  5. Proof Over Promise (live systems as evidence)"
+    echo ""
+    echo "Generate with:"
+    echo "  Gamma Deck: python3 iac-gamma-full.py (needs GAMMA_API_KEY)"
+    echo "  Blog/social: See .pi/agents/content.md for prompts"
+}
+
+# Main dispatch
+case "${1:-help}" in
+    status)      print_header; cmd_status ;;
+    pitch)       print_header; cmd_pitch ;;
+    prism)       print_header; cmd_prism "$2" ;;
+    context)     print_header; cmd_context ;;
+    jobs)        print_header; cmd_jobs ;;
+    recon)       print_header; cmd_recon ;;
+    campaigns)   print_header; cmd_campaigns ;;
+    website)     print_header; cmd_website ;;
+    hexis)       print_header; cmd_hexis ;;
+    content)     print_header; cmd_content ;;
+    help|--help|-h) print_header; print_help ;;
+    *)           print_header; echo "Unknown command: $1"; echo ""; print_help ;;
+esac
