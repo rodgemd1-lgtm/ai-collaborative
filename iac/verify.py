@@ -1,193 +1,59 @@
-"""Verify script — health check for the Pi IAC repository.
-
-Usage: python3 -m iac.verify
-"""
-
-import json
+#!/usr/bin/env python3
+"""Verify Pi IA Collaborative installation."""
+import sys
 from pathlib import Path
-from typing import List, Tuple
 
-REPO_ROOT = Path(__file__).parent.parent.resolve()
-PI_DIR = REPO_ROOT / ".pi"
-PROMPTS_DIR = PI_DIR / "prompts"
-AGENTS_DIR = PI_DIR / "agents"
-CAPS_DIR = PI_DIR / "capabilities"
+ROOT = Path(__file__).parent.parent
+PASS, FAIL = [], []
 
-REQUIRED_FILES = {
-    "root": [
-        "README.md",
-        ".gitignore",
-    ],
-    ".pi": [
-        "README.md",
-        "settings.json",
-        "workflows.json",
-        "orchestration.md",
-    ],
-    "prompts": [
-        "iac-context.md",
-        "pitch-prep.md",
-        "prism-sim.md",
-        "hexis-eval.md",
-        "recon.md",
-        "website-audit.md",
-        "content-create.md",
-        "campaign-health.md",
-    ],
-    "agents": [
-        "README.md",
-        "strategy.md",
-        "content.md",
-        "client.md",
-        "web.md",
-        "campaigns.md",
-        "research.md",
-    ],
-    "capabilities": [
-        "browser-use.md",
-        "composio.md",
-        "gamma.md",
-        "apollo.md",
-        "prism.md",
-    ],
-    "python": [
-        "iac/__init__.py",
-        "iac/client.py",
-        "iac/simulation.py",
-        "bin/pi-iac",
-    ],
-}
+def check(name, cond, hint=""):
+    (PASS if cond else FAIL).append(f"  {'PASS' if cond else 'FAIL'}  {name}" + (f"  → {hint}" if hint and not cond else ""))
 
+def main():
+    print("\n" + "="*60 + "\n  PI IA COLLABORATIVE — VERIFICATION\n" + "="*60 + "\n")
 
-def check_file(path: Path, label: str) -> Tuple[bool, str]:
-    if path.exists():
-        size = path.stat().st_size
-        return True, f"  OK  {label} ({size} bytes)"
-    return False, f"  MISSING {label}"
+    # Structure
+    for d in [".pi", ".pi/agents", ".pi/capabilities", ".pi/prompts", "iac"]:
+        check(d, (ROOT / d).is_dir())
 
+    # Config files
+    for f in ["settings.json", "workflows.json", "orchestration.md"]:
+        check(f, (ROOT / ".pi" / f).is_file())
 
-def check_json(path: Path) -> Tuple[bool, str]:
-    ok, msg = check_file(path, str(path.relative_to(REPO_ROOT)))
-    if not ok:
-        return ok, msg
-    try:
-        with open(path, "r") as f:
-            data = json.load(f)
-        return True, f"  OK  {path.name} (valid JSON, {len(json.dumps(data))} chars)"
-    except json.JSONDecodeError as e:
-        return False, f"  BROKEN JSON {path.name}: {e}"
+    # Workflow prompts
+    for wf in ["pitch-prep", "prism-sim", "hexis-eval", "recon", "website-audit", "content-create", "campaign-health"]:
+        check(f"workflow: {wf}", (ROOT / ".pi" / "prompts" / f"{wf}.md").is_file())
 
+    # Context
+    ctx = ROOT / ".pi" / "prompts" / "iac-context.md"
+    check("iac-context.md", ctx.is_file())
+    if ctx.is_file():
+        sz = ctx.stat().st_size
+        check("iac-context.md populated", sz > 5000, f"{sz} bytes")
 
-def verify() -> int:
-    print("=" * 60)
-    print("π Pi IAC — Repository Health Check")
-    print("=" * 60)
-    print(f"Repo root: {REPO_ROOT}")
-    print()
-
-    all_ok = True
-
-    # Root files
-    print("[Root files]")
-    for name in REQUIRED_FILES["root"]:
-        ok, msg = check_file(REPO_ROOT / name, name)
-        print(msg)
-        if not ok:
-            all_ok = False
-    print()
-
-    # .pi files
-    print("[.pi/ files]")
-    for name in REQUIRED_FILES[".pi"]:
-        if name.endswith(".json"):
-            ok, msg = check_json(PI_DIR / name)
-        else:
-            ok, msg = check_file(PI_DIR / name, name)
-        print(msg)
-        if not ok:
-            all_ok = False
-    print()
-
-    # Prompts
-    print("[Prompts]")
-    for name in REQUIRED_FILES["prompts"]:
-        ok, msg = check_file(PROMPTS_DIR / name, name)
-        print(msg)
-        if not ok:
-            all_ok = False
-    print()
-
-    # Agents
-    print("[Agents]")
-    for name in REQUIRED_FILES["agents"]:
-        ok, msg = check_file(AGENTS_DIR / name, name)
-        print(msg)
-        if not ok:
-            all_ok = False
-    print()
-
-    # Capabilities
-    print("[Capabilities]")
-    for name in REQUIRED_FILES["capabilities"]:
-        ok, msg = check_file(CAPS_DIR / name, name)
-        print(msg)
-        if not ok:
-            all_ok = False
-    print()
+    # Agents + capabilities
+    for a in ["strategy", "content", "client", "web", "campaigns", "research"]:
+        check(f"agent: {a}", (ROOT / ".pi" / "agents" / f"{a}.md").is_file())
+    for c in ["browser-use", "composio", "gamma", "apollo", "prism"]:
+        check(f"capability: {c}", (ROOT / ".pi" / "capabilities" / f"{c}.md").is_file())
 
     # Python package
-    print("[Python package]")
-    for name in REQUIRED_FILES["python"]:
-        ok, msg = check_file(REPO_ROOT / name, name)
-        print(msg)
-        if not ok:
-            all_ok = False
+    for f in ["__init__.py", "client.py", "simulation.py"]:
+        check(f"iac/{f}", (ROOT / "iac" / f).is_file())
 
-    # Check if workflows.json matches prompts
-    print()
-    print("[Workflow consistency check]")
-    workflows_path = PI_DIR / "workflows.json"
+    # Import test
     try:
-        with open(workflows_path, "r") as f:
-            workflows = json.load(f)
-        workflow_files = [w["path"] for w in workflows.get("workflows", [])]
-        for wf in workflow_files:
-            full = REPO_ROOT / wf
-            ok, msg = check_file(full, wf)
-            print(msg)
-            if not ok:
-                all_ok = False
+        sys.path.insert(0, str(ROOT))
+        import iac.client; import iac.simulation
+        check("Python import", True)
     except Exception as e:
-        print(f"  BROKEN workflows.json: {e}")
-        all_ok = False
+        check("Python import", False, str(e)[:80])
 
-    # Check master context length
-    print()
-    print("[Master context check]")
-    ctx_path = PROMPTS_DIR / "iac-context.md"
-    ok, msg = check_file(ctx_path, "iac-context.md")
-    print(msg)
-    if ok:
-        lines = len(ctx_path.read_text().splitlines())
-        print(f"  Context lines: {lines}")
-        if lines < 200:
-            print(f"  WARNING: Context seems short (< 200 lines). Was it truncated?")
-        else:
-            print(f"  Context looks complete.")
-    else:
-        all_ok = False
-
-    # Summary
-    print()
-    print("=" * 60)
-    if all_ok:
-        print("ALL CHECKS PASSED — Repository is complete.")
-    else:
-        print("SOME CHECKS FAILED — See MISSING / BROKEN lines above.")
-    print("=" * 60)
-
-    return 0 if all_ok else 1
-
+    print("\n".join(PASS))
+    if FAIL:
+        print("\n" + "\n".join(FAIL))
+    print(f"\n{'='*60}\n  Result: {len(PASS)} passed, {len(FAIL)} failed\n" + "="*60 + "\n")
+    return 0 if not FAIL else 1
 
 if __name__ == "__main__":
-    exit(verify())
+    sys.exit(main())

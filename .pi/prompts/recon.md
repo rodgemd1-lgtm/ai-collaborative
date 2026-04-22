@@ -1,62 +1,32 @@
-# Workflow: Deep Recon
+# Deep Recon Workflow
 
-## Trigger
-Researching IAC, competitors, or clients. Activated by: `Pi IAC recon`, "research competitor", "scrape careers"
+**When:** Researching IAC, competitors, or clients.
+**Trigger:** `pi-iac recon`
 
-## Goal
-Produce timestamped, sourced intelligence on IAC or a target entity for strategy, content, or meeting preparation.
+## IAC Targets
+- iacollaborative.com (homepage, about, services, insights, results)
+- iacollaborative.com/careers (open roles)
+- LinkedIn (IA Collaborative page, follower count)
+- Crunchbase (funding, headcount, growth signals)
 
-## Steps
+## Competitor Targets
+- IDEO, Frog Design, McKinsey Design, Accenture Song, BCGDV
 
-### 1. Target Definition
-- What entity? (IAC, competitor, client, market)
-- What questions need answering? (e.g., "What's changed on iacollaborative.com in the last 30 days?")
-- What decisions depend on this intel?
-
-### 2. Source Selection (Research Agent)
-
-| Priority | Source | Tool | Notes |
-|----------|--------|------|-------|
-| 1 | iacollaborative.com | Browser Use API | JS-rendered; check careers, insights, team |
-| 2 | LinkedIn profiles | Browser Use (logged-in session) | Requires persistent profile |
-| 3 | Competitor sites | Browser Use API | IDEO, Frog, McKinsey Design, Accenture Song |
-| 4 | Job boards | Browser Use API | Ashby, LinkedIn Jobs, Indeed |
-| 5 | News / press | Web extract | Google News, TechCrunch, design industry pubs |
-| 6 | Apollo enrichment | Apollo API | Account intel, tech stack, trigger events |
-
-### 3. Data Collection
-- Scrape all relevant pages
-- Extract: dates, numbers, names, quotes, URLs
-- Tag each artifact with: source URL, confidence (HIGH/MED/LOW), collection date
-- Store raw output to `data/recon/[TARGET]-[DATE]/`
-
-### 4. Synthesis
-- What changed? (new hires, case studies, pricing, positioning)
-- What is the competitive move? (who is entering/exiting what space)
-- What are the implications for IAC engagement?
-- What questions remain unanswered?
-
-### 5. Intelligence Brief
-```
-recon-brief-[TARGET]-[DATE].md
-├── Executive Summary (3 bullets)
-├── Source Inventory (with confidence levels)
-├── Key Changes / Findings
-├── Competitive Implications
-├── IAC Engagement Impact
-├── Open Questions
-└── Recommended Actions
+## Browser Use API
+```python
+import urllib.request, json
+api_key = "bu_yqOqXL7AXnTBpo_Wf3fplAxOwu950C-F20HVQ19NczE"
+req = urllib.request.Request(
+    "https://api.browser-use.com/api/v3/sessions",
+    data=json.dumps({"task": "...", "model": "claude-sonnet-4.6", "max_steps": 25}).encode(),
+    headers={"Content-Type": "application/json", "X-Browser-Use-API-Key": api_key}
+)
+resp = urllib.request.urlopen(req, timeout=120)
+session_id = json.loads(resp.read())["id"]
 ```
 
-### 6. Update Master Context
-If recon changes anything in `prompts/iac-context.md` (e.g., new hire, new pricing, new case study), flag it for update.
-
-## Known Issues
-- LinkedIn blocks unauthenticated scraping — use Browser Use with persistent login
-- Competitor data decays fast; schedule refresh for key competitors every 30 days
-- Browser Use sessions may show "stopped" even when output is ready — check output directly
-
-## Never Rules
-- Never claim intel without a documented source URL
-- Never assign HIGH confidence to unverified information
-- Never use stale data (> 30 days) for competitive comparison without a refresh flag
+## Output Standards
+Every intel artifact needs:
+- Source URL + date collected
+- Confidence level (HIGH / MED / LOW)
+- Source type (web_scrape / reasoning / Apollo / simulation)

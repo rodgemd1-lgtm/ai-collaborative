@@ -1,68 +1,39 @@
-# Workflow: Prism Simulation
+# Prism Simulation Workflow
 
-## Trigger
-Before high-stakes decisions or internal deliberation prep. Activated by: `Pi IAC prism`, "run simulation", "what will Kyle say"
+**When:** Before high-stakes decisions.
+**Trigger:** `pi-iac prism`
 
-## Goal
-Model how IAC leadership will react to a strategic decision and produce an intervention-ranked action plan.
-
-## Steps
-
-### 1. Decision Question Formulation
-- State the exact decision this simulation informs
-- Example: "Should Kyle propose Package A to the partner group?"
-- Example: "What happens if Matthew wasn't pre-briefed?"
-- A simulation without a clear decision question is entertainment, not evidence
-
-### 2. Scenario Selection (Research Agent)
-Choose from the MiroFish domain:
-
-| Scenario | Use When |
-|----------|----------|
-| `meeting_reception` | Before any Kyle meeting — 72h deliberation model |
-| `strategic_choice` | After a pilot commitment — 12-week trajectory model |
-
-If no scenario matches perfectly, use `meeting_reception` as the base and customize personas.
-
-### 3. Variant Selection
-Choose at least 3 variants to compare:
-
-| Variant | When to Use |
-|---------|-------------|
-| `control` | Baseline — no special moves |
-| `matthew_pre_brief` | Matthew will be in the room (highest leverage) |
-| `co_ceo_dinner` | You can arrange dinner with Kathleen + Dan |
-| `package_a_only` | Decision paralysis risk; simplify the ask |
-| `strategos_frame` | You want to position as strategic peer |
-| `live_v5_demo` | You have a live demo ready |
-| `all_interventions` | Maximum conversion play (resource-intensive) |
-
-### 4. Run the Engine
+## Run
 ```bash
-cd ~/Desktop/Startup-Intelligence-OS/MiroFish
-python run_simulation.py \
-  --scenario meeting_reception \
-  --variant all_interventions \
-  --personas kyle,matthew,kathleen,dan,jeff,rahul \
-  --rounds 6
+cd ~/Desktop/ai-collaborative
+python3 -m iac.simulation --scenario [scenario] --variant [variant]
 ```
 
-### 5. Synthesize Output
-For each variant, produce:
-- **Champion rates** by leader (Kyle, Matthew, Kathleen, Dan, Jeff, Rahul)
-- **Close probability** at 30 days
-- **Expected deal size**
-- **Objection inventory** (ranked by frequency and severity)
-- **Blocking leader** prediction
-- **Recommended intervention** (highest ROI move)
+## Scenarios
+- `meeting_reception` — Before any IAC meeting
+- `strategic_choice` — Package A vs B vs C
 
-### 6. Store & Action
-- Save output to `data/simulations/prism-[YYYYMMDD]-[scenario]-[variant].md`
-- Surface the recommended intervention in the next agent action
-- If simulation fails, DO NOT quote fabricated scores — flag the failure and use heuristic scores from ontology
+## Variants
+- `control` — No interventions
+- `pre_brief` — Pre-brief Matthew only
+- `co_ceo_dinner` — Co-CEO dinner without pre-brief
+- `all_interventions` — Both combined
 
-## Never Rules
-- Never run a simulation without a clear decision question
-- Never quote simulation scores without running the engine (or flagging heuristics)
-- Never use a lightweight model for synthesis — use `kimi-k2.6:cloud` or `claude-sonnet-4.6`
-- Never run only one variant; always compare control → intervention
+## Stance Scale
+| Score | Meaning |
+|-------|---------|
+| 0.0–0.25 | OPPOSE / KILL |
+| 0.25–0.50 | SKEPTICAL / PUNT |
+| 0.50–0.75 | NEUTRAL / ENGAGED |
+| 0.75–1.00 | CHAMPION / SIGN |
+
+## Key Thresholds
+- Matthew stance at hour 0 < 0.50 → pre-brief is MANDATORY
+- Kyle no shift at hour 48 → follow-up needs more urgency
+- All personas > 0.85 at hour 72 → GO signal
+
+## Output Processing
+1. Save to `data/simulations/`
+2. Extract top 3 objections
+3. Draft pre-emptive responses
+4. Update persona tracker in `iac/client.py`

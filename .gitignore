@@ -1,51 +1,25 @@
-# Data and secrets
-.env
-.env.local
-*.pem
-*.key
-data/*
-!data/.gitkeep
-vault/*
-!vault/.gitkeep
-
-# Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
 .Python
-env/
-venv/
-.venv/
-dist/
 build/
-*.egg-info/
-
-# IDEs
+dist/
+.venv/
+venv/
+.env
+.env.local
+data/leads/*.json
+data/operations/*.json
+data/clients/*.json
+data/simulations/*.json
+.vault/
 .vscode/
 .idea/
 *.swp
-*.swo
-*~
-
-# OS
 .DS_Store
-Thumbs.db
-
-# Logs
+.vercel/
 *.log
-logs/
-
-# Generated artifacts
-output/
-tmp/
-temp/
-*.tmp
-
-# Node (if any web builds)
-node_modules/
-.next/
-
-# Ignore large binaries
-*.zip
-*.tar.gz
+npm-debug.log*
+configs/*.local.yaml
+*.pem
+*.key

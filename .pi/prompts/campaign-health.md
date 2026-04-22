@@ -1,83 +1,31 @@
-# Workflow: Campaign Health Check
+# Campaign Health Check Workflow
 
-## Trigger
-Checking Instantly/Apollo campaign performance. Activated by: `Pi IAC campaigns`, "check email", "campaign status"
+**When:** Checking Instantly/Apollo campaign performance.
+**Trigger:** `pi-iac campaigns`
 
-## Goal
-Diagnose deliverability, engagement, and list health; produce a prioritized fix list.
+## Instantly — 3 Failures Since April 10
+**Do NOT launch new campaigns until root cause is diagnosed.**
 
-## Steps
+Diagnostic:
+1. Check SPF/DKIM/DMARC on sending domain
+2. Check template spam scores
+3. Audit lead list quality
+4. Warm up cold sending domains
 
-### 1. Deliverability Audit (Campaigns Agent)
-Check for every sending domain:
-- SPF record present and valid
-- DKIM record present and valid
-- DMARC policy present (p=quarantine or p=reject)
-- Domain reputation (Google Postmaster, Microsoft SNDS)
-- Blacklist check (Spamhaus, Barracuda, etc.)
+**IAC outreach:** Use warm intro channels (Kellogg, Innovation Roundtable, D&AD) — not cold email.
 
-### 2. Campaign Performance Pull (Campaigns Agent)
-From Instantly:
-- Total sent, delivered, bounced, opened, clicked, replied, unsubscribed
-- Bounce rate (target < 2%)
-- Open rate (target > 25%)
-- Reply rate (target > 3%)
-- Unsubscribe rate (target < 0.5%)
-- Failure log (any failure events in last 7 days)
+## Apollo Target Accounts
+1. Glossier  6. TransUnion
+2. YETI  7. Zendesk
+3. Warby Parker  8. Morningstar
+4. Robinhood  9. Envestnet
+5. Coinbase  10. Monday.com
 
-From Apollo:
-- List enrichment completeness (target ≥ 80%)
-- Lead-to-sequence match rate
-- Rate limit hits in last 7 days
+Target: Title CEO/COO/CINO/VP Product | Size 50–5000 employees | Mid-market $50M–$500M
 
-### 3. Email Quality Audit (Content + Campaigns Agent)
-For each active template:
-- Spam score check (Mail-Tester or similar)
-- Template A/B test status (minimum 2 variants)
-- Unsubscribe link present and functional
-- Subject line length (≤ 60 chars)
-- Body length (≤ 150 words for cold email)
-- Personalization tokens present and populated
-- "Consultative" tone (not "Buy our AI")
-
-### 4. List Health Audit (Campaigns Agent)
-- Mid-market only: $50M–$500M company size (verified via Apollo)
-- Role match: C-suite, VP, Head of, Director-level for strategy/innovation
-- Industry alignment: Technology, Healthcare, Financial Services, CPG, Industrial
-- No competitors on the list (IDEO, Frog, etc.)
-- Recency: leads enriched within 30 days
-
-### 5. Issue Triage
-
-| Severity | Issue | Action | ETA |
-|----------|-------|--------|-----|
-| P0 | SPF/DKIM/DMARC fail | Fix DNS records immediately | < 24h |
-| P0 | > 5% bounce rate | Pause campaign, clean list | < 4h |
-| P1 | Open rate < 20% | Refresh subject lines, test 3 variants | < 48h |
-| P1 | Reply rate < 2% | Rewrite body copy, add personalization | < 48h |
-| P2 | A/B test not running | Launch second variant | < 72h |
-| P2 | Enrichment < 80% | Re-enrich via Apollo, batch 100 | < 72h |
-| P3 | List quality drift | Re-segment, re-score leads | < 1 week |
-
-### 6. Output
-```
-campaign-health-[DATE].md
-├── Deliverability Summary
-├── Performance Metrics
-├── Email Quality Audit
-├── List Health Audit
-├── Issue Triage Table
-├── Fix Actions + Owners
-└── 7-Day Follow-Up Plan
-```
-
-## Known Issues
-- **3 Instantly failures since April 10.** Root cause unknown — may be SPF, template, or list quality. This is a P0 investigation.
-- **Apollo rate limits** — batch in groups of 100
-- **Cold email fatigue** — IAC is a design firm, not SaaS. Outbound must feel consultative.
-
-## Never Rules
-- Never launch a sequence without SPF/DKIM/DMARC pass
-- Never send without A/B variants
-- Never use a list with > 2% bounce rate
-- Never mix enterprise leads into the IAC mid-market campaign
+## Enrichment Workflow
+1. Pull list via Apollo API
+2. Enrich ≥ 80% complete
+3. Score by IAC-relevance (0–100)
+4. Export to `data/leads/`
+5. Push to Instantly (when healthy)

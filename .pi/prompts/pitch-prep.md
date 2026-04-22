@@ -1,63 +1,41 @@
-# Workflow: Pitch Preparation
+# Pitch Preparation Workflow
 
-## Trigger
-Before any IAC meeting or client presentation. Activated by: `Pi IAC pitch`, "meeting tomorrow", "prepare for Kyle"
+**When:** Before any IAC meeting or client presentation.
+**Trigger:** `pi-iac pitch` or "meeting tomorrow" or "prepare for Kyle"
 
-## Goal
-Produce a meeting-ready brief that maximizes the probability of a positive Kyle Smith response within the 72-hour decision window.
+## Phase 1 — Context Load (5 min)
+- [ ] Load `.pi/prompts/iac-context.md`
+- [ ] Check `data/clients/` for last meeting notes
+- [ ] Confirm who is attending
+- [ ] Identify decision weight
 
-## Steps
+## Phase 2 — Prism Simulation (10 min)
+- [ ] Run: `python3 -m iac.simulation --scenario meeting_reception --variant all_interventions`
+- [ ] Read stance at hour 0, 24, 48, 72
+- [ ] Identify #1 objection to pre-empt
+- [ ] Confirm: has Matthew been pre-briefed?
 
-### 1. Decision Chain Map (Client Agent)
-- Identify who attends the meeting
-- Map formal authority: Kyle < $100K; Co-CEOs for > $100K
-- If Matthew attends → TRIGGER Matthew pre-brief workflow immediately
-- If Kathleen attends → verify materials pass IA-grade craft gate
-- If Dan attends → ensure P&L and unit economics memo are attached
+## Phase 3 — Materials Check (5 min)
+- [ ] Gamma deck reviewed? (`.vault/last-gamma-deck.txt`)
+- [ ] Demo site live? (https://iac-mid-market-v5.vercel.app)
+- [ ] Printed PDF backup ready
+- [ ] Calculator ready for Dan's deal math test
 
-### 2. Recon Refresh (Research Agent)
-- Scrape iacollaborative.com for new case studies, insights, team changes (Browser Use API)
-- Check LinkedIn for target attendees: recent posts, job changes, speaking engagements
-- Refresh competitive landscape if > 30 days old
-- Document all intel with source URL + confidence level + date
+## Phase 4 — Persona-Specific Prep
+| Audience | Lead With | Key Ask |
+|----------|-----------|---------|
+| Kyle | Evidence + live artifact | "Here's what IAC could become" |
+| Matthew | Technical depth (74 agents) | "I work WITH your team" |
+| Dan | Unit economics + outcomes | 90-day metrics, go/no-go gate |
+| Kathleen | Craft + Seven Elements | Category creation language |
 
-### 3. Prism Simulation (Research Agent)
-- Run `meeting_reception` scenario with selected intervention variant
-- Default: `all_interventions` variant (Matthew pre-brief + Co-CEO dinner + Package A only + live v5 demo)
-- If simulation unavailable, flag and use heuristic scores from ontology
-- Record: projected champion rates, objection inventory, blocking leader
+## Phase 5 — Follow-Up Draft (BEFORE meeting ends)
+Draft T+48h follow-up email now. Kyle shifts to CHAMPION at exactly hour 48.
 
-### 4. Material Assembly (Content Agent)
-- Pitch deck: max 12 slides (Kyle attention span)
-- Deck must include: The Flip (60s reframe), live demo URL, MiroFish numbers, packages (lead with A), clear ask
-- Speaker notes: persona-aware (Kyle = evidence-first, Kathleen = craft-first, Dan = numbers-first)
-- Leave-behind memo: proof URL + 90-day success criteria + 3 risks + mitigations
-- All stats cited with source; all frameworks (Hexis, IDEALS, Seven Elements) anchored to IAC IP
+## Phase 6 — Go/No-Go
+- Matthew pre-briefed?
+- Package scoped correctly?
+- Metrics are 90-day achievable?
+- Follow-up drafted?
 
-### 5. Pre-Meeting Checklist
-- [ ] Decision chain mapped and attendees confirmed
-- [ ] Recon data refreshed within 7 days
-- [ ] Prism simulation run (or flagged unavailable)
-- [ ] Deck: ≤ 12 slides, IA-grade craft, live demo included
-- [ ] Speaker notes: persona-aware for every attendee
-- [ ] Leave-behind: crisp memo with success criteria
-- [ ] Matthew pre-brief sent (if Matthew attending)
-- [ ] Follow-up email drafted before the meeting ends
-
-### 6. Output Bundle
-```
-pitch-brief-[DATE]/
-├── decision-chain.md
-├── recon-summary.md
-├── prism-sim-output.md
-├── deck/ (Gamma ID + PDF export)
-├── speaker-notes.md
-├── leave-behind-memo.md
-└── follow-up-draft.md
-```
-
-## Never Rules
-- Never send a deck without running it through the Kathleen gate (visual + narrative quality)
-- Never pitch without a clear ask (Package A as default)
-- Never attend a Matthew-attended meeting without a pre-brief
-- Never present Package B or C as the lead — always anchor with A
+If ANY is NO → delay the pitch.
